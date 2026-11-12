@@ -1,0 +1,28 @@
+name: deploy
+
+
+
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag to deploy (e.g. 1.0.0, 1.0.1)'
+        required: true
+        default: '1.0.0'
+
+
+
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: production
+    steps:
+      - name: Deploy container
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          IMAGE="ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          docker rm -f lab11-prod 2>/dev/null || true
+          docker run -d --name lab11-prod -p 8012:8000 "$IMAGE:$TAG"
